@@ -1,0 +1,64 @@
+version 16.9
+!
+hostname R2
+!
+ip domain name cyprotect.co.uk
+!
+crypto ikev2 proposal CYPROTECT-IKEV2-PROPOSAL 
+ encryption aes-gcm-256
+ prf sha512
+ group 21
+!
+crypto ikev2 policy CYPROTECT-IKEV2-POLICY 
+ proposal CYPROTECT-IKEV2-PROPOSAL
+!
+crypto ikev2 keyring CYPROTECT-IKEV2-KEYRING
+ peer R1  
+  description R1 remote access router
+  address 11.0.0.2
+  identity fqdn R1.cyprotect.co.uk
+  pre-shared-key local CYPROTECT-REMOTE-KEY
+  pre-shared-key remote CYPROTECT-LOCAL-KEY
+ !
+crypto ikev2 profile CYPROTECT-IKEV2-PROFILE
+ match identity remote fqdn R1.cyprotect.co.uk
+ identity local fqdn R2.cyprotect.co.uk
+ authentication remote pre-share
+ authentication local pre-share
+ keyring local CYPROTECT-IKEV2-KEYRING
+!
+crypto ipsec transform-set CYPROTECT-IPSEC-SET esp-gcm 256 
+ mode tunnel
+!
+crypto ipsec profile CYPROTECT-IPSEC-PROFILE
+ set transform-set CYPROTECT-IPSEC-SET 
+ set ikev2-profile CYPROTECT-IKEV2-PROFILE
+!
+interface Loopback2
+ description VPN-ANCHOR
+ ip address 2.2.2.2 255.255.255.255
+!         
+interface Loopback10
+ description LAN-SIMULATED
+ ip address 10.2.2.1 255.255.255.0
+!
+interface Tunnel1
+ ip unnumbered Loopback2
+ ip mtu 1400
+ ip tcp adjust-mss 1360
+ tunnel source GigabitEthernet2
+ tunnel mode ipsec ipv4
+ tunnel destination 11.0.0.2
+ tunnel protection ipsec profile CYPROTECT-IPSEC-PROFILE
+!
+interface GigabitEthernet2
+ ip address 22.0.0.2 255.255.255.0
+ no shutdown
+!
+router eigrp 100
+ network 2.2.2.2 0.0.0.0
+ network 10.2.2.0 0.0.0.255
+!
+ip route 0.0.0.0 0.0.0.0 22.0.0.1
+!
+end
