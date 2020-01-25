@@ -1,0 +1,33 @@
+hostname ASA1
+domain-name Cyprotect.co.uk
+enable password **cisco
+
+aaa authentication ssh console LOCAL
+ssh stricthostkeycheck
+ssh 172.16.1.253 255.255.255.255 inside
+ssh timeout 5
+ssh version 2
+ssh cipher encryption high
+ssh cipher integrity high
+ssh key-exchange group dh-group14-sha1
+
+banner exec
+banner login UNAUTHORIZED ACCESS TO THIS DEVICE IS PROHIBITED
+banner login
+banner login You must have explicit, authorized permission to access or configure this device.
+banner login
+banner login Unauthorized attempts and actions to access or use this system may result in civil and/or
+banner login criminal penalties.
+banner login
+banner login All activities performed on this device are logged and monitored.
+banner login
+banner motd Cyprotect.co.uk ASA - No unauthorised_Access
+
+username Admin password cisco privilege 15
+username Admin attributes
+service-type nas-prompt
+
+
+#Generate Stronger RSA key
+#Crypto key generate RSA Modulus 4096
+#yes
