@@ -1,0 +1,65 @@
+hostname ASA1
+enable password $sha512$5000$C32BUL7xi4megTE1qt8S2A==$i6wqJ19ytpTFktyxjWdExA== pbkdf2
+!
+interface GigabitEthernet0/0
+ description outside_to_ASA2
+ nameif outside
+ security-level 0
+ ip address 92.0.0.1 255.255.255.0 
+!
+interface GigabitEthernet0/1
+ nameif Management
+ security-level 100
+ ip address 172.16.1.72 255.255.255.0 
+!
+interface GigabitEthernet0/2
+ description inside_to_R1
+ nameif inside
+ security-level 100
+ ip address 192.168.10.1 255.255.255.0 
+!
+object network NETWORK_OBJ_192.168.20.0_24
+ subnet 192.168.20.0 255.255.255.0
+object network NETWORK_OBJ_192.168.10.0_24
+ subnet 192.168.10.0 255.255.255.0
+access-list outside_cryptomap extended permit ip 192.168.10.0 255.255.255.0 192.168.20.0 255.255.255.0 
+mtu outside 1500
+mtu Management 1500
+mtu inside 1500
+nat (inside,outside) source static NETWORK_OBJ_192.168.10.0_24 NETWORK_OBJ_192.168.10.0_24 destination static NETWORK_OBJ_192.168.20.0_24 NETWORK_OBJ_192.168.20.0_24 no-proxy-arp route-lookup
+route outside 192.168.20.0 255.255.255.0 92.0.0.2 1
+!
+http server enable
+http 172.16.1.253 255.255.255.255 Management
+!
+crypto ipsec ikev2 ipsec-proposal AES_GCM
+ protocol esp encryption aes-gcm-256
+!
+crypto map outside_map 1 match address outside_cryptomap
+crypto map outside_map 1 set pfs group21
+crypto map outside_map 1 set peer 92.0.0.2 
+crypto map outside_map 1 set ikev2 ipsec-proposal AES_GCM
+crypto map outside_map 1 set ikev2 pre-shared-key *****
+crypto map outside_map interface outside
+!
+crypto ikev2 policy 10
+ encryption aes-gcm-256
+ integrity null
+ group 21
+ prf sha512
+ lifetime seconds 86400
+!
+crypto ikev2 enable outside
+!
+group-policy GroupPolicy_92.0.0.2 internal
+group-policy GroupPolicy_92.0.0.2 attributes
+ vpn-tunnel-protocol ikev2 
+dynamic-access-policy-record DfltAccessPolicy
+username cisco password $sha512$5000$mQQgOakfHpkPOJDBBA12GQ==$D6mI7slsQhY6T3X3BT0KhQ== pbkdf2
+tunnel-group 92.0.0.2 type ipsec-l2l
+tunnel-group 92.0.0.2 general-attributes
+ default-group-policy GroupPolicy_92.0.0.2
+tunnel-group 92.0.0.2 ipsec-attributes
+ ikev2 remote-authentication pre-shared-key *****
+ ikev2 local-authentication pre-shared-key *****
+!
