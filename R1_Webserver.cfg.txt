@@ -1,0 +1,23 @@
+version 16.9
+!
+username cisco password 0 cisco123
+!
+interface GigabitEthernet1
+ ip address dhcp
+ negotiation auto
+ no mop enabled
+ no mop sysid
+!
+interface GigabitEthernet2
+ ip address 192.168.100.2 255.255.255.0
+ negotiation auto
+ no mop enabled
+ no mop sysid
+!
+ip http server
+ip http authentication local
+ip http secure-server
+ip http client source-interface GigabitEthernet1
+ip route 0.0.0.0 0.0.0.0 192.168.100.1
+!
+end
