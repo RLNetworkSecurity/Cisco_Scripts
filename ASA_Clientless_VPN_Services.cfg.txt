@@ -1,0 +1,43 @@
+ASA Version 9.9(2) 
+!
+hostname ASA1
+!
+interface GigabitEthernet0/0
+ nameif Management
+ security-level 100
+ ip address 172.16.1.72 255.255.255.0 
+!
+interface GigabitEthernet0/1
+ description inside
+ nameif inside
+ security-level 100
+ ip address 192.168.100.1 255.0.0.0 
+!
+interface GigabitEthernet0/2
+ description outside
+ nameif outside
+ security-level 0
+ ip address 172.16.2.51 255.255.255.0 
+!
+!
+webvpn
+ enable outside
+ cache
+  disable
+ error-recovery disable
+group-policy SERVICES_GROUP internal
+group-policy SERVICES_GROUP attributes
+ banner value CYPROTECT.CO.UK SERVICES PORTAL, NO UNAUTHORISED ACCESS
+ vpn-tunnel-protocol ssl-clientless
+dynamic-access-policy-record DfltAccessPolicy
+username services password $sha512$5000$DthFv55mwtMUxv5tT79GpA==$DHhQxDN8YtgWKcbrjlKoVw== pbkdf2
+username services attributes
+ vpn-group-policy SERVICES_GROUP
+ service-type remote-access
+!
+tunnel-group SERVICES_CONN_GROUP type remote-access
+tunnel-group SERVICES_CONN_GROUP general-attributes
+ default-group-policy SERVICES_GROUP
+tunnel-group SERVICES_CONN_GROUP webvpn-attributes
+ group-alias SERVICES_CONN_ALIAS enable
+!
