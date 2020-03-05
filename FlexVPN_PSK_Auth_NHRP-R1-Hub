@@ -1,0 +1,60 @@
+version 16.9
+!
+hostname R1
+!
+ip domain name cyprotect.co.uk
+!
+crypto ikev2 proposal default
+ encryption aes-gcm-256
+ prf sha512
+ group 21
+!
+crypto ikev2 keyring CYPROTECT-IKEV2-KEYRING
+ peer R2
+  description R2 remote access router
+  address 22.0.0.2
+  identity fqdn R2.cyprotect.co.uk
+  pre-shared-key local CYPROTECT-FLEX-LAB-KEY
+  pre-shared-key remote CYPROTECT-FLEX-LAB-KEY
+ !
+ peer R3
+  description R3 remote access router
+  address 33.0.0.2
+  identity fqdn R3.cyprotect.co.uk
+  pre-shared-key local CYPROTECT-FLEX-LAB-KEY
+  pre-shared-key remote CYPROTECT-FLEX-LAB-KEY
+ !        
+crypto ikev2 profile default
+ match identity remote fqdn domain cyprotect.co.uk
+ identity local fqdn R1.cyprotect.co.uk
+ authentication remote pre-share
+ authentication local pre-share
+ keyring local CYPROTECT-IKEV2-KEYRING
+ virtual-template 2
+!         
+crypto ipsec profile default
+ set ikev2-profile default
+!
+interface Loopback1
+ ip address 10.1.1.1 255.255.255.0
+!
+interface Loopback10
+ ip address 172.16.0.1 255.255.255.255
+!         
+interface GigabitEthernet2
+ ip address 11.0.0.2 255.255.255.0
+ negotiation auto
+!
+interface Virtual-Template2 type tunnel
+ ip unnumbered Loopback10
+ no ip next-hop-self eigrp 100
+ no ip split-horizon eigrp 100
+ ip nhrp network-id 1
+ ip nhrp redirect
+ tunnel protection ipsec profile default
+!
+router eigrp 100
+ network 10.1.1.0 0.0.0.255
+ network 172.16.0.1 0.0.0.0
+!         
+ip route 0.0.0.0 0.0.0.0 11.0.0.1
