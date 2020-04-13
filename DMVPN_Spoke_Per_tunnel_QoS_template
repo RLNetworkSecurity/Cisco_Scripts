@@ -1,0 +1,6 @@
+Hostname 10MBS_SPOKE
+!
+int tunnel 100
+ip nhrp group 10_MBS_SPOKE_GROUP
+service-policy output #upload policy-map
+!
