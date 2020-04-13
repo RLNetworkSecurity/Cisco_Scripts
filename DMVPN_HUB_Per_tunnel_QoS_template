@@ -1,0 +1,43 @@
+class-map VOIP
+match dscp ef
+class-map SQL
+match protocol sqlserv
+class-map HTTP
+match protocol HTTP
+!
+policy-map 10_MBS_POLICY
+class VOIP
+ priority percent 10
+class HTTP
+ bandwidth percent 10
+class SQL
+ bandwidth percent 10
+class class-default
+fair-queue
+!
+policy-map 50_MBS_POLICY
+class VOIP
+ priority percent 10
+class HTTP
+ bandwidth percent 10
+class SQL
+ bandwidth percent 10
+class class-default
+fair-queue
+!
+policy-map 10_MBS_PM
+class class-default
+shape average 10 m
+service-policy 10_MBS_POLICY
+!
+policy-map 50_MBS_PM
+class class-default
+shape average 50 m
+service-policy 50_MBS_POLICY
+!
+interface tunnel 100
+ip nhrp map group 10_MBS_SPOKE_GROUP service-policy output 10_MBS_PM
+ip nhrp map group 50_MBS_SPOKE_GROUP service-policy output 50_MBS_PM
+!
+#show policy-map multipoint
+
