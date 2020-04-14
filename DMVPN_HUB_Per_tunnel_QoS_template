@@ -1,4 +1,4 @@
-#Classify the traffic to be QoS
+#Defining traffic class
 class-map SKYPE_VOICE
 match dscp ef
 class-map SKYPE_VIDEO
@@ -6,35 +6,35 @@ match dscp af41
 class-map ROUTING
 match dscp cs6
 !
-#Policy defining the service policy, Classified traffic to bandwidth percentage allocation 10Mbps
+#Define Traffic policy
 policy-map 10_MBPS_SPOLICY
 class SKYPE_VOICE
  priority percent 20
 class SKYPE_VIDEO
- bandwidth percent 10
+ bandwidth percent 20
 class ROUTING
  bandwidth percent 10
 class class-default
 fair-queue
 !
-#Policy defining the service policy, Classified traffic to bandwidth percentage allocation 50Mbps
+#Define Traffic policy
 policy-map 50_MBPS_SPOLICY
 class SKYPE_VOICE
  priority percent 10
 class SKYPE_VIDEO
  bandwidth percent 10
 class ROUTING
- bandwidth percent 10
+ bandwidth percent 1
 class class-default
 fair-queue
 !
-#Policy map the service policy and defining a shape average
+#Define Policy action
 policy-map 10_MBPS_PM
 class class-default
 shape average 10 m
 service-policy 10_MBPS_POLICY
 !
-#Policy map the service policy and defining a shape average
+#Define Policy action
 policy-map 50_MBPS_PM
 class class-default
 shape average 50 m
