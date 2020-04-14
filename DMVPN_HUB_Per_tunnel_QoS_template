@@ -1,3 +1,4 @@
+#Classify the traffic to be QoS
 class-map VOIP
 match dscp ef
 class-map SQL
@@ -5,7 +6,19 @@ match protocol sqlserv
 class-map HTTP
 match protocol HTTP
 !
-policy-map 10_MBS_POLICY
+#Policy defining the service policy, Classified traffic to bandwidth percentage allocation 10Mbps
+policy-map 10_MBPS_SPOLICY
+class VOIP
+ priority percent 20
+class HTTP
+ bandwidth percent 10
+class SQL
+ bandwidth percent 10
+class class-default
+fair-queue
+!
+#Policy defining the service policy, Classified traffic to bandwidth percentage allocation 50Mbps
+policy-map 50_MBPS_SPOLICY
 class VOIP
  priority percent 10
 class HTTP
@@ -15,29 +28,22 @@ class SQL
 class class-default
 fair-queue
 !
-policy-map 50_MBS_POLICY
-class VOIP
- priority percent 10
-class HTTP
- bandwidth percent 10
-class SQL
- bandwidth percent 10
-class class-default
-fair-queue
-!
-policy-map 10_MBS_PM
+#Policy map the service policy and defining a shape average
+policy-map 10_MBPS_PM
 class class-default
 shape average 10 m
-service-policy 10_MBS_POLICY
+service-policy 10_MBPS_POLICY
 !
-policy-map 50_MBS_PM
+#Policy map the service policy and defining a shape average
+policy-map 50_MBPS_PM
 class class-default
 shape average 50 m
-service-policy 50_MBS_POLICY
+service-policy 50_MBPS_POLICY
 !
+#Policy map the service policy and defining a shape average
 interface tunnel 100
-ip nhrp map group 10_MBS_SPOKE_GROUP service-policy output 10_MBS_PM
-ip nhrp map group 50_MBS_SPOKE_GROUP service-policy output 50_MBS_PM
+ip nhrp map group 10_MBPS_SPOKE_GROUP service-policy output 10_MBPS_PM
+ip nhrp map group 50_MBPS_SPOKE_GROUP service-policy output 50_MBPS_PM
 !
 #show policy-map multipoint
 
