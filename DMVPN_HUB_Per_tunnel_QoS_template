@@ -40,7 +40,7 @@ class class-default
 shape average 50 m
 service-policy 50_MBPS_POLICY
 !
-#Policy map the service policy and defining a shape average
+#map the sevice policy to the nhrp group
 interface tunnel 100
 ip nhrp map group 10_MBPS_SPOKE_GROUP service-policy output 10_MBPS_PM
 ip nhrp map group 50_MBPS_SPOKE_GROUP service-policy output 50_MBPS_PM
