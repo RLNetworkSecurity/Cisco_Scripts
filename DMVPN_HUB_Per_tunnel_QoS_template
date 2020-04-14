@@ -1,29 +1,29 @@
 #Classify the traffic to be QoS
-class-map VOIP
+class-map SKYPE_VOICE
 match dscp ef
-class-map SQL
-match protocol sqlserv
-class-map HTTP
-match protocol HTTP
+class-map SKYPE_VIDEO
+match dscp af41
+class-map ROUTING
+match dscp cs6
 !
 #Policy defining the service policy, Classified traffic to bandwidth percentage allocation 10Mbps
 policy-map 10_MBPS_SPOLICY
-class VOIP
+class SKYPE_VOICE
  priority percent 20
-class HTTP
+class SKYPE_VIDEO
  bandwidth percent 10
-class SQL
+class ROUTING
  bandwidth percent 10
 class class-default
 fair-queue
 !
 #Policy defining the service policy, Classified traffic to bandwidth percentage allocation 50Mbps
 policy-map 50_MBPS_SPOLICY
-class VOIP
+class SKYPE_VOICE
  priority percent 10
-class HTTP
+class SKYPE_VIDEO
  bandwidth percent 10
-class SQL
+class ROUTING
  bandwidth percent 10
 class class-default
 fair-queue
