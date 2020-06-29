@@ -1,7 +1,7 @@
 While True:
-    username == input("enter username: ")
+    username = input("enter username: ")
     
-    password == input("enter password: ")
+    password = input("enter password: ")
     
     if username == "Rdog" and password == "password":
         break
